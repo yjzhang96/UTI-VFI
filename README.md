@@ -24,13 +24,18 @@ Download pretrained model weights from [Google Drive](https://drive.google.com/d
 Put model weights "SEframe_net.pth" and "refine_net.pth" into directory "./UTI_model_weights"; put "model.ckpt" and "network-default.pytorch" into directory "./utils"
 
 ### Dataset
-download GoPro datasets with all the figh-frame-rate video frames from [GOPRO_Large_all](https://drive.google.com/file/d/1SlURvdQsokgsoyTosAaELc4zRjQz9T2U/view), and generate blurry videos for different exposure settings.
+download GoPro datasets with all the figh-frame-rate video frames from [GOPRO_Large_all](https://drive.google.com/file/d/1SlURvdQsokgsoyTosAaELc4zRjQz9T2U/view), and generate blurry videos for different exposure settings. You can generate the test datasets via run:
+```bash
+python utils/generate_blur.py
+```
 
 
 ### Test
+After prepared test datasets, you can run test the following command:
  ```bash
 sh run_test.sh
 ```
+Note that to test the model on GOPRO datasets (datasets with groud-truth to compare), you need to set the argument "--test_type" to ''validation''. If you want to test the model on real-world video (without ground-truth), you need to use "real_world" instead.
 </div>
 
 
