@@ -8,7 +8,7 @@ Conference
 
 ## How to run   
 ### Prerequisites
-- NVIDIA GPU + CUDA CuDNN (CPU untested, feedback appreciated)
+- NVIDIA GPU + CUDA CuDNN 
 - Pytorch
 
 ```bash
@@ -28,12 +28,12 @@ sh run_test.sh
 
 ## Citation   
 ```
-@article{YourName,
-  title={Your Title},
-  author={Your team},
-  journal={Location},
-  year={Year}
+@article{Zhang2019video,
+  title={Video Frame Interpolation without Temporal Priors},
+  author={Zhang, Youjian and Wang, Chaoyue and Tao, Dacheng},
+  journal={Advances in Neural Information Processing Systems},
+  year={2020}
 }
 ```
 ## Acknowledgment
-Code borrows heavily from [QVI](https://sites.google.com/view/xiangyuxu/qvi_nips19)
+Code of interpolation module borrows heavily from [QVI](https://sites.google.com/view/xiangyuxu/qvi_nips19)
