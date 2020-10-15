@@ -2,7 +2,6 @@
 
 result_dir='./results'
 save_name="UTI-gopro-55"
-interpolate_root="./results/deblur-400epoch-55"
 
 
 CUDA_VISIBLE_DEVICES=0 python test.py \
