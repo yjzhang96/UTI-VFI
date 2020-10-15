@@ -19,9 +19,10 @@ First clone the project
 ```bash
 git clone https://github.com/yjzhang96/UTI-VFI 
 cd UTI-VFI
+mkdir pretrain_models
  ``` 
 Download pretrained model weights from [Google Drive](https://drive.google.com/drive/folders/1kW8v66c1_FAyi_qAojJ6SjBop8ufduSY?usp=sharing).
-Put model weights "SEframe_net.pth" and "refine_net.pth" into directory "./UTI_model_weights"; put "model.ckpt" and "network-default.pytorch" into directory "./utils"
+Put model weights "SEframe_net.pth" and "refine_net.pth" into directory "./pretrain_models"; put "model.ckpt" and "network-default.pytorch" into directory "./utils"
 
 ### Dataset
 download GoPro datasets with all the figh-frame-rate video frames from [GOPRO_Large_all](https://drive.google.com/file/d/1SlURvdQsokgsoyTosAaELc4zRjQz9T2U/view), and generate blurry videos for different exposure settings. You can generate the test datasets via run:
