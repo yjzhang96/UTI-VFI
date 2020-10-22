@@ -32,7 +32,7 @@ python utils/generate_blur.py
 
 
 ### Test
-After prepared test datasets, you can run test the following command:
+After prepared test datasets, you can run test usding the following command:
  ```bash
 sh run_test.sh
 ```
