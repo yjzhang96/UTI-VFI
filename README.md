@@ -1,6 +1,6 @@
 # Video Frame Interpolation without Temporal Priors (NeurIPS2020)
 
-[Paper]
+[[Paper](https://github.com/yjzhang96/UTI-VFI/raw/master/paper/nips_camera_ready.pdf)] [[video](https://drive.google.com/file/d/1eRUzA2m3EvvrHw0MhO4AMxEQEgdt8LGc/view?usp=sharing)]
 <!--  
 Conference   
 -->   
@@ -42,7 +42,7 @@ Note that to test the model on GOPRO datasets (datasets with groud-truth to comp
 
 ## Citation   
 ```
-@article{Zhang2019video,
+@inproceedings{Zhang2019video,
   title={Video Frame Interpolation without Temporal Priors},
   author={Zhang, Youjian and Wang, Chaoyue and Tao, Dacheng},
   journal={Advances in Neural Information Processing Systems},
