@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F 
 from torch.utils.data import DataLoader
 from shutil import rmtree
-from models import model_SEframe, model_refineS2
+from models import model_SEframe_stage2, model_refineS2
 from utils import utils
 
 
@@ -70,8 +70,10 @@ trans_list = transforms.Compose([transforms.ToTensor(), normalize1])
 # testing deblur
 if deblur:
     ### initialize model
-    model = model_SEframe.SEframeNet(args)
-    model.load(args)
+    model = model_SEframe_stage2.SEframeNet(args)
+    load_file = 'pretrain_models' + '/' + 'SEframe_net.pth'
+    model.SE_deblur_net.load_state_dict(torch.load(load_file))
+    print('--------load model %s success!-------'%load_file)
 
     
     blur_dir = args.blurry_videos

@@ -139,21 +139,28 @@ class Residual_Net(nn.Module):
         return Residual
 
 class Deblur_2step(nn.Module):
-    def __init__(self, input_c, output_c=6):
+    def __init__(self, input_c, output_c=6, only_stage1=False):
         super(Deblur_2step,self).__init__()
         self.deblur_net = Residual_Net(input_c,12,n_RDB=20)
         self.refine_net = Residual_Net(9,output_c,n_RDB=10)
+        self.only_stage1 = only_stage1
+
     def forward(self, B0,B1,B2,B3):
         input1 = torch.cat((B0,B1,B2,B3),1)
         # with torch.no_grad():
-        res1 = self.deblur_net(input1).detach()
-        deblur_out = torch.split(res1 + torch.cat((B1, B1, B2, B2), 1), 3, 1)
-        deblur_B1 = torch.cat((B1, deblur_out[0],deblur_out[1]),1)
-        deblur_B2 = torch.cat((B2, deblur_out[2],deblur_out[3]),1)
-        res2_B1 = self.refine_net(deblur_B1)
-        res2_B2 = self.refine_net(deblur_B2)
-        refine_B1 = torch.split(res2_B1 + torch.cat((deblur_out[0], deblur_out[1]), 1), 3, 1)
-        refine_B2 = torch.split(res2_B2 + torch.cat((deblur_out[2], deblur_out[3]), 1), 3, 1)
-        refine_out = refine_B1 + refine_B2
+        if self.only_stage1:
+            res1 = self.deblur_net(input1)
+            deblur_out = torch.split(res1 + torch.cat((B1, B1, B2, B2), 1), 3, 1)
+            return deblur_out
+        else:
+            res1 = self.deblur_net(input1).detach()
+            deblur_out = torch.split(res1 + torch.cat((B1, B1, B2, B2), 1), 3, 1)
+            deblur_B1 = torch.cat((B1, deblur_out[0],deblur_out[1]),1)
+            deblur_B2 = torch.cat((B2, deblur_out[2],deblur_out[3]),1)
+            res2_B1 = self.refine_net(deblur_B1)
+            res2_B2 = self.refine_net(deblur_B2)
+            refine_B1 = torch.split(res2_B1 + torch.cat((deblur_out[0], deblur_out[1]), 1), 3, 1)
+            refine_B2 = torch.split(res2_B2 + torch.cat((deblur_out[2], deblur_out[3]), 1), 3, 1)
+            refine_out = refine_B1 + refine_B2
 
-        return deblur_out, refine_out
+            return deblur_out, refine_out

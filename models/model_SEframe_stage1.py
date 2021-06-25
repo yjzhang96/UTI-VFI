@@ -1,10 +1,11 @@
+import ipdb
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import os
 import torch.nn.functional as F
-from .networks import weights_init, Deblur_2step
+from .networks import Deblur_2step
 from collections import OrderedDict
 from .PWCNetnew import PWCNet
 from utils import utils
@@ -18,58 +19,43 @@ class SEframeNet():
             self.device = torch.device('cpu')
 
         ### initial model
-        self.SE_deblur_net = Deblur_2step(input_c=4*3)
-
+        self.SE_deblur_net = Deblur_2step(input_c=4*3, only_stage1=True)
         self.SE_deblur_net.to(self.device)
+
         ###Loss and Optimizer
         self.L1_loss = nn.L1Loss()
         self.L2_loss = nn.MSELoss()
-
+        
         params = self.SE_deblur_net.parameters()
         if args.train:
             self.optimizer = optim.Adam(params, lr=args.lr, betas=(0.9,0.999))
 
 
     def set_input(self,batch_data):
-        self.input_B0 = batch_data['B0'].to(self.device)
         self.input_B1 = batch_data['B1'].to(self.device)
         self.input_B2 = batch_data['B2'].to(self.device)
+        self.input_B0 = batch_data['B0'].to(self.device)
         self.input_B3 = batch_data['B3'].to(self.device)
-        self.input_B1_S = batch_data['B1_S'].to(self.device)
+
         self.input_B1_E = batch_data['B1_E'].to(self.device)
-        self.input_B2_S = batch_data['B2_S'].to(self.device)
+        self.input_B1_S = batch_data['B1_S'].to(self.device)
         self.input_B2_E = batch_data['B2_E'].to(self.device)
+        self.input_B2_S = batch_data['B2_S'].to(self.device)
         self.B1_path = batch_data['B1_path']
         self.B2_path = batch_data['B2_path']
 
-    def set_test_input(self,batch_data):
-        self.input_B0 = batch_data[0].to(self.device)
-        self.input_B1 = batch_data[1].to(self.device)
-        self.input_B2 = batch_data[2].to(self.device)
-        self.input_B3 = batch_data[3].to(self.device)
-
     def forward(self):
+
+        out = self.SE_deblur_net(self.input_B0 ,self.input_B1,self.input_B2,self.input_B3)
         
-        # get estimated start end frame
-        out1, out2 = self.SE_deblur_net(self.input_B0,self.input_B1,self.input_B2, self.input_B3)
-                
         # loss 
-        self.tot_loss = 0
-        loss_B1_S = self.L1_loss(self.input_B1_S,out1[0])
-        loss_B1_E = self.L1_loss(self.input_B1_E,out1[1])
-        loss_B2_S = self.L1_loss(self.input_B2_S,out1[2])
-        loss_B2_E = self.L1_loss(self.input_B2_E,out1[3])
-        self.tot_1 = loss_B1_E + loss_B1_S + loss_B2_S + loss_B2_E
+        loss_B1_S = self.L1_loss(self.input_B1_S,out[0])
+        loss_B1_E = self.L1_loss(self.input_B1_E,out[1])
+        loss_B2_S = self.L1_loss(self.input_B2_S,out[2])
+        loss_B2_E = self.L1_loss(self.input_B2_E,out[3])
 
-        loss_B1_S = self.L1_loss(self.input_B1_S,out2[0])
-        loss_B1_E = self.L1_loss(self.input_B1_E,out2[1])
-        loss_B2_S = self.L1_loss(self.input_B2_S,out2[2])
-        loss_B2_E = self.L1_loss(self.input_B2_E,out2[3])
-        self.tot_2 = loss_B1_E + loss_B1_S + loss_B2_S + loss_B2_E
-
-    
-        self.tot_loss = 0.5 * self.tot_1 + self.tot_2 
-        self.output = {'B1_S':out2[0],'B1_E':out2[1],'B2_S':out2[2],'B2_E':out2[3]}
+        self.output = {'B1_S':out[0],'B1_E':out[1],'B2_S':out[2],'B2_E':out[3]}
+        self.tot_loss = loss_B1_S + loss_B1_E + loss_B2_S + loss_B2_E
         
     def optimize(self):
         self.forward()
@@ -79,17 +65,15 @@ class SEframeNet():
     
     def get_loss(self):
         
-        return OrderedDict([('total_loss', self.tot_loss.item()),
-                            ('step1', self.tot_1),
-                            ('step2', self.tot_2),
-                            ])
+        return OrderedDict([('total_loss', self.tot_loss.item())])
     
     def test(self, validation = False):
         with torch.no_grad():
+            # flow_1_2 = self.flow_net(self.input_B1,self.input_B2)
             # get estimated start end frame
-            out1, out2 = self.SE_deblur_net(self.input_B0,self.input_B1,self.input_B2, self.input_B3)
-            choose_out = out2
-            self.output = {'B1_S':choose_out[0],'B1_E':choose_out[1],'B2_S':choose_out[2],'B2_E':choose_out[3]}
+            out = self.SE_deblur_net(self.input_B0 ,self.input_B1,self.input_B2,self.input_B3)
+            self.output = {'B1_S':out[0],'B1_E':out[1],'B2_S':out[2],'B2_E':out[3]}
+
         # calculate PSNR
         def PSNR(img1, img2):
             MSE = self.L2_loss(img1,img2)
@@ -115,13 +99,17 @@ class SEframeNet():
             self.SE_deblur_net.to(self.device)
 
     def load(self, args):
-        # load_path = os.path.join(args.checkpoints, args.model_name)
-        load_file = 'pretrain_models' + '/' + 'SEframe_net.pth'
+        load_path = os.path.join(args.checkpoints, args.model_name)
+        load_file = load_path + '/' + 'SEframe_net_%s.pth'%args.which_epoch
         self.SE_deblur_net.load_state_dict(torch.load(load_file))
         print('--------load model %s success!-------'%load_file)
 
 
     def schedule_lr(self, epoch,tot_epoch):
+        # scheduler
+        # print("current learning rate:%.7f"%self.scheduler.get_lr())
+        # self.scheduler.step()
+
         lr = self.opt.lr
         self.get_current_lr_from_epoch(lr, epoch, tot_epoch)
 
