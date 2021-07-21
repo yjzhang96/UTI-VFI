@@ -1,6 +1,6 @@
 # Video Frame Interpolation without Temporal Priors (NeurIPS2020)
 
-[[Paper](https://github.com/yjzhang96/UTI-VFI/raw/master/paper/nips_camera_ready.pdf)] [[video](https://drive.google.com/file/d/1eRUzA2m3EvvrHw0MhO4AMxEQEgdt8LGc/view?usp=sharing)]
+[[Paper](https://github.com/yjzhang96/UTI-VFI/raw/master/paper/nips_camera_ready.pdf)] [[video](https://www.youtube.com/watch?v=aTKa--tmHuM)]
 <!--  
 Conference   
 -->   
